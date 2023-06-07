@@ -1,0 +1,17 @@
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\bin\Debug\net6.0\CMM-Simulator.exe
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\bin\Debug\net6.0\CMM-Simulator.deps.json
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\bin\Debug\net6.0\CMM-Simulator.runtimeconfig.json
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\bin\Debug\net6.0\CMM-Simulator.dll
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\bin\Debug\net6.0\CMM-Simulator.pdb
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\CMM-Simulator.csproj.AssemblyReference.cache
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\CMM-Simulator.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\CMM-Simulator.AssemblyInfoInputs.cache
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\CMM-Simulator.AssemblyInfo.cs
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\CMM-Simulator.csproj.CoreCompileInputs.cache
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\CMM-Simulator.dll
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\refint\CMM-Simulator.dll
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\CMM-Simulator.pdb
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\CMM-Simulator.genruntimeconfig.cache
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\ref\CMM-Simulator.dll
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\bin\Debug\net6.0\CsvHelper.dll
+C:\Users\Adam\Documents\CMM-Simulator\CMM-Simulator\obj\Debug\net6.0\CMM-Simulator.csproj.CopyComplete

@@ -1,0 +1,38 @@
+DMISMN/'Default metric project',05.2
+FILNAM/'Default metric project',05.2
+DV(0)=DMESWV/'86,2,30227'
+UNITS/MM,ANGDEC
+DECPL/ALL,DEFALT
+V(0)=VFORM/ALL,PLOT
+DISPLY/TERM,V(0),STOR,DMIS,V(0)
+SNSET/APPRCH,5
+SNSET/RETRCT,5
+SNSET/SEARCH,5
+SNSET/CLRSRF,15
+SNSET/DEPTH,0
+MODE/MAN
+ 
+DECL/LOCAL,CHAR,512,start_time,elapsed_time
+ 
+$$ Capture the time at the start of inspection
+ 
+start_time=ASSIGN/sdatetime( )
+ 
+RECALL/SA(A0.0_B0.0_TP20_M2-30_2x20)
+SNSLCT/SA(A0.0_B0.0_TP20_M2-30_2x20)
+ 
+MODE/AUTO,PROG,MAN
+ 
+GOTO/CART,0,9.775,50
+ 
+F(CIR001)=FEAT/CIRCLE,INNER,CART,0,9.775,33.9,0,0,1,7.779
+MEAS/CIRCLE,F(CIR001),3
+ENDMES
+ 
+elapsed_time=ASSIGN/selapsetime(start_time,sdatetime( ),LONG)
+ 
+12.059
+11.533
+ 
+PAUSE
+ENDFIL

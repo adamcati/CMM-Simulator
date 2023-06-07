@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "QCyNNCRs/A47K+QKqs8jbfInmegaOjrRaQpX5yP1O7aMnYe1/UZmC8eDdbl0vHL4vKxrZ9rj8H9sHEoY0bv2Tw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Adam\\Documents\\CMM-Simulator\\CMM-Simulator\\CMM-Simulator.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Adam\\.nuget\\packages\\csvhelper\\30.0.1\\csvhelper.30.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}
