@@ -44,13 +44,15 @@ public class CircleModel : FeatureModel
         string circleDirection = orderedVectors[2].Key;
         //circleDirection = circle.Vectors.Where(x => x.Value == 1).ToList().First().Key;
 
-        circle.Coordinates[circleDirection] = 0;
+        //circle.Coordinates[circleDirection] = 0;
         PointModel pointOnCircle = GetOnePointOnCircle(circle.Coordinates[circleAxis[0]],
             circle.Coordinates[circleAxis[1]],
+            circle.Coordinates[circleDirection],
             circle.NumberOfDivisions,
             circle.Diameter / 2,
             circleAxis[0],
-            circleAxis[1]);
+            circleAxis[1],
+            circleDirection);
         double distanceToTravel;
         double diagonalAcceleration = Physics.GetDiagonalAcceleration(CMM.Acceleration[circleAxis[0]], CMM.Acceleration[circleAxis[1]],0);
         double diagonalVelocity = Physics.GetDiagonalVelocity(CMM.Velocity[circleAxis[0]], CMM.Velocity[circleAxis[1]],0);
@@ -65,7 +67,7 @@ public class CircleModel : FeatureModel
         return output;
     }
 
-    public PointModel GetOnePointOnCircle(double firstCoordinate, double secondCoordinate, int numberOfDivisions, double radius, string firstAxis, string secondAxis)
+    public PointModel GetOnePointOnCircle(double firstCoordinate, double secondCoordinate, double thirdCoordinate,int numberOfDivisions, double radius, string firstAxis, string secondAxis, string circleDirection)
     {
         PointModel pointOnCircle = new PointModel(0, 0, 0, 0, 0, 0);
         double angle = 360 / numberOfDivisions;
@@ -73,6 +75,7 @@ public class CircleModel : FeatureModel
         double y = secondCoordinate + radius * Math.Sin((Math.PI / 180) * angle);
         pointOnCircle.Coordinates[firstAxis] = x;
         pointOnCircle.Coordinates[secondAxis] = y;
+        pointOnCircle.Coordinates[circleDirection] = thirdCoordinate;
 
         return pointOnCircle;
     }

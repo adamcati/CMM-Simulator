@@ -10,10 +10,9 @@ using System.Threading.Tasks;
 namespace CMM_Simulator.Controllers;
 public class CMMController
 {
-    CMMModel CMM1 = new CMMModel();
     PointModel startPoint = new PointModel(0, 0, 0, 0, 0, 0);
 
-    public double GetTimeOfBlockfExecution(Operations actionType, List<string> measurementBlock)
+    public double GetTimeOfBlockfExecution(Operations actionType, List<string> measurementBlock,CMMModel CMM1)
     {
         double output = 0;
 
@@ -25,12 +24,12 @@ public class CMMController
             case Operations.Measurement:
                 Features featureType = FeatureModel.GetFeatureType(measurementBlock.First());
                 ProgramModes measurementMode = GetMeasurementMode(measurementBlock);
-                output += GetMeasurementTime(featureType, measurementMode, measurementBlock);
+                output += GetMeasurementTime(featureType, measurementMode, measurementBlock, CMM1);
                 break;
             case Operations.GoTo:
                 GoTo goToType = GetGoToType(measurementBlock.First());
                 double[] goToData = FeatureModel.GetFeatureData(measurementBlock.First());
-                output += GetGoToMovementTime(goToType, goToData);
+                output += GetGoToMovementTime(goToType, goToData, CMM1);
                 break;
             case Operations.SensorSelect:
                 output += 4;
@@ -40,7 +39,7 @@ public class CMMController
         return output;
     }
 
-    private double GetMeasurementTime(Features featureType, ProgramModes measurementMode, List<string> measurementBlock)
+    private double GetMeasurementTime(Features featureType, ProgramModes measurementMode, List<string> measurementBlock, CMMModel CMM1)
     {
         double output = 0;
 
@@ -51,8 +50,8 @@ public class CMMController
                 case Features.CIRCLE:
                     CircleModel circle = new CircleModel(0,0,0,0,0,0,0,0);
                     circle = circle.GetCircleFromMeasurementBlock(measurementBlock);
-                    output += GetClearanceMoveTime(circle);
-                    output += GetMoveToFeatureTime(circle);
+                    output += GetClearanceMoveTime(circle, CMM1);
+                    output += GetMoveToFeatureTime(circle, CMM1);
                     output += circle.GetCircleMeasurementTime(circle, CMM1);
                     startPoint = new PointModel(circle.Coordinates["x-axis"], circle.Coordinates["y-axis"], circle.Coordinates["z-axis"],
                         circle.Vectors["x-axis"], circle.Vectors["x-axis"], circle.Vectors["x-axis"]);
@@ -60,14 +59,24 @@ public class CMMController
                 case Features.POINT:
                     double[] data = FeatureModel.GetFeatureData(measurementBlock.First());
                     PointModel pointToMeasure = new PointModel(data[0], data[1], data[2], data[3], data[4], data[5]);
-                    output += GetClearanceMoveTime(pointToMeasure);
-                    output += GetMoveToFeatureTime(pointToMeasure);
+                    output += GetClearanceMoveTime(pointToMeasure, CMM1);
+                    output += GetMoveToFeatureTime(pointToMeasure, CMM1);
                     PointModel pointAtApproachDistance = GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings["APPRCH"]);
-                    output += GetDiagonalMoveToPointTime(startPoint, pointAtApproachDistance);
-                    output += GetSinglePointMeasurementTime(pointAtApproachDistance, pointToMeasure);
+                    output += GetDiagonalMoveToPointTime(startPoint, pointAtApproachDistance, CMM1);
+                    output += GetSinglePointMeasurementTime(pointAtApproachDistance, pointToMeasure, CMM1);
                     PointModel pointAtRetractDistance = GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings["RETRCT"]);
-                    output += GetRetractFromPointTime(pointToMeasure, pointAtRetractDistance);
+                    output += GetRetractFromPointTime(pointToMeasure, pointAtRetractDistance, CMM1);
                     startPoint = pointToMeasure;
+                    break;
+                case Features.ARC:
+                    CircleModel arc = new CircleModel(0, 0, 0, 0, 0, 0, 0, 0);
+                    arc = arc.GetCircleFromMeasurementBlock(measurementBlock);
+                    arc.Diameter = arc.Diameter * 2;
+                    output += GetClearanceMoveTime(arc,CMM1);
+                    output += GetMoveToFeatureTime(arc, CMM1);
+                    output += arc.GetCircleMeasurementTime(arc, CMM1);
+                    startPoint = new PointModel(arc.Coordinates["x-axis"], arc.Coordinates["y-axis"], arc.Coordinates["z-axis"],
+                        arc.Vectors["x-axis"], arc.Vectors["x-axis"], arc.Vectors["x-axis"]);
                     break;
                 default:
                     throw new Exception($"Feature simulation not implemented {featureType}");
@@ -83,10 +92,10 @@ public class CMMController
                     double[] data = FeatureModel.GetFeatureData(block);
                     PointModel pointToMeasure = new PointModel(data[0], data[1], data[2], data[3], data[4], data[5]);
                     PointModel endPoint = GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings["APPRCH"]);
-                    output += GetDiagonalMoveToPointTime(startPoint, endPoint);
-                    output += GetSinglePointMeasurementTime(endPoint, pointToMeasure);
+                    output += GetDiagonalMoveToPointTime(startPoint, endPoint, CMM1);
+                    output += GetSinglePointMeasurementTime(endPoint, pointToMeasure, CMM1);
                     endPoint = GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings["RETRCT"]);
-                    output += GetRetractFromPointTime(pointToMeasure, endPoint);
+                    output += GetRetractFromPointTime(pointToMeasure, endPoint, CMM1);
                     startPoint = pointToMeasure;
                 }
             }
@@ -95,7 +104,7 @@ public class CMMController
         return output;
     }
 
-    private double GetMoveToFeatureTime(FeatureModel feature)
+    private double GetMoveToFeatureTime(FeatureModel feature, CMMModel CMM1)
     {
         double output = 0;
 
@@ -109,7 +118,7 @@ public class CMMController
         return output;
     }
 
-    private double GetTimeToApproach(string axis)
+    private double GetTimeToApproach(string axis, CMMModel CMM1)
     {
         double output;
 
@@ -159,7 +168,7 @@ public class CMMController
         return ProgramModes.AUTO;
     }
 
-    double GetGoToMovementTime(GoTo goToType, double[] goToData)
+    double GetGoToMovementTime(GoTo goToType, double[] goToData, CMMModel CMM1)
     {
         double output = 0;
 
@@ -193,7 +202,7 @@ public class CMMController
 
         return output;
     }
-    double GetSinglePointMeasurementTime(PointModel startPoint, PointModel endPoint)
+    double GetSinglePointMeasurementTime(PointModel startPoint, PointModel endPoint, CMMModel CMM1)
     {
         double output = 0;
         double distanceToTravel;
@@ -213,7 +222,7 @@ public class CMMController
         return output;
     }
 
-    double GetDiagonalMoveToPointTime(PointModel startpoint, PointModel endPoint)
+    double GetDiagonalMoveToPointTime(PointModel startpoint, PointModel endPoint, CMMModel CMM1)
     {
         double output = 0;
 
@@ -237,7 +246,7 @@ public class CMMController
         return output;
     }
 
-    private double GetRetractFromPointTime(PointModel pointToMeasure, PointModel endPoint)
+    private double GetRetractFromPointTime(PointModel pointToMeasure, PointModel endPoint, CMMModel CMM1)
     {
         double distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
             startPoint.Coordinates["x-axis"], endPoint.Coordinates["x-axis"],
@@ -247,7 +256,7 @@ public class CMMController
         return Physics.GetTimeToTravelDistance(distanceToTravel, CMM1.RetractSpeed, CMM1.RetractAcceleration);
     }
 
-    private double GetClearanceMoveTime(FeatureModel featureToMeasure)
+    private double GetClearanceMoveTime(FeatureModel featureToMeasure, CMMModel CMM1)
     {
         double output = 0;
 

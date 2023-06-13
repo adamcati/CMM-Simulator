@@ -10,7 +10,7 @@ CMMController controller = new CMMController();
 //measurement time is in seconds
 double measurementTime = 0;
 
-List<string> fileLines = FileHandler.ReadAllNonEmptyLines("C:\\Users\\Adam\\Downloads\\141A3505-115_REV_A_1F.dmi");
+List<string> fileLines = FileHandler.ReadAllNonEmptyLines("C:\\Users\\Adam\\Downloads\\V5311076420500_REV_B00.dmi");
 fileLines.RemoveTextOutfilFromFileLines();
 fileLines.RemoveOutputsFromFileLines();
 fileLines.RemoveCommentsFromFileLines();
@@ -22,7 +22,7 @@ List<string> measurementBlock = new List<string>();
 foreach (string line in fileLines)
 {
 
-    if (line.Contains('/'))
+    if (line.Contains("SNSET"))
     {
         if (CMM1.Settings.ContainsKey(line.Split('/')[1].Split(',')[0]))
         {
@@ -41,18 +41,18 @@ while(i < fileLines.Count)
             measurementBlock.Add(fileLines[i]);
             i++;
         }
-        measurementTime += controller.GetTimeOfBlockfExecution(Operations.Measurement, measurementBlock);
+        measurementTime += controller.GetTimeOfBlockfExecution(Operations.Measurement, measurementBlock, CMM1);
         ClearMeasurementBock();
     }
     else if (fileLines[i].Contains("GOTO"))
     {
         measurementBlock.Add((string)fileLines[i]);
-        measurementTime += controller.GetTimeOfBlockfExecution(Operations.GoTo, measurementBlock);
+        measurementTime += controller.GetTimeOfBlockfExecution(Operations.GoTo, measurementBlock, CMM1);
         ClearMeasurementBock();
     }
     else if(fileLines[i].Contains("SNSLCT"))
     {
-        measurementTime += controller.GetTimeOfBlockfExecution(Operations.SensorSelect, null);
+        measurementTime += controller.GetTimeOfBlockfExecution(Operations.SensorSelect, null,CMM1);
     }
     else
     {
