@@ -10,7 +10,7 @@ CMMController controller = new CMMController();
 //measurement time is in seconds
 double measurementTime = 0;
 
-List<string> fileLines = FileHandler.ReadAllNonEmptyLines("C:\\Users\\Adam\\Downloads\\V5311076420500_REV_B00.dmi");
+List<string> fileLines = FileHandler.ReadAllNonEmptyLines("C:\\Users\\Adam\\Documents\\cylinder.DMI");
 fileLines.RemoveTextOutfilFromFileLines();
 fileLines.RemoveOutputsFromFileLines();
 fileLines.RemoveCommentsFromFileLines();
@@ -34,32 +34,39 @@ foreach (string line in fileLines)
 int i = 0;
 while(i < fileLines.Count)
 {
-    if (fileLines[i].Contains("FEAT"))
+    try
     {
-        while (fileLines[i] != "ENDMES")
+        if (fileLines[i].Contains("FEAT"))
         {
-            measurementBlock.Add(fileLines[i]);
-            i++;
+            while (fileLines[i] != "ENDMES")
+            {
+                measurementBlock.Add(fileLines[i]);
+                i++;
+            }
+            measurementTime += controller.GetTimeOfBlockfExecution(Operations.Measurement, measurementBlock, CMM1);
+            ClearMeasurementBock();
         }
-        measurementTime += controller.GetTimeOfBlockfExecution(Operations.Measurement, measurementBlock, CMM1);
-        ClearMeasurementBock();
-    }
-    else if (fileLines[i].Contains("GOTO"))
-    {
-        measurementBlock.Add((string)fileLines[i]);
-        measurementTime += controller.GetTimeOfBlockfExecution(Operations.GoTo, measurementBlock, CMM1);
-        ClearMeasurementBock();
-    }
-    else if(fileLines[i].Contains("SNSLCT"))
-    {
-        measurementTime += controller.GetTimeOfBlockfExecution(Operations.SensorSelect, null,CMM1);
-    }
-    else
-    {
-        Console.WriteLine($"Other operations type: {fileLines[i]}");
-    }
+        else if (fileLines[i].Contains("GOTO"))
+        {
+            measurementBlock.Add((string)fileLines[i]);
+            measurementTime += controller.GetTimeOfBlockfExecution(Operations.GoTo, measurementBlock, CMM1);
+            ClearMeasurementBock();
+        }
+        else if (fileLines[i].Contains("SNSLCT"))
+        {
+            measurementTime += controller.GetTimeOfBlockfExecution(Operations.SensorSelect, null, CMM1);
+        }
+        else
+        {
+            Console.WriteLine($"Other operations type: {fileLines[i]}");
+        }
 
-    i++;
+        i++;
+    }
+    catch(Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
 }
 
 void ClearMeasurementBock()

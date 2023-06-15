@@ -11,7 +11,11 @@ public class FeatureModel
     public Dictionary<string, double> Coordinates { get; }
     public Dictionary<string, double> Vectors { get; }
 
-    public FeatureModel() { }
+    public FeatureModel() 
+    {
+        Coordinates = new Dictionary<string, double>();
+        Vectors = new Dictionary<string, double>();
+    }
 
     public FeatureModel(double x, double y, double z, double i, double j, double k)
     {

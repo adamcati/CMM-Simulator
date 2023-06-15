@@ -39,6 +39,25 @@ public class CMMController
         return output;
     }
 
+    private double GetFeatureMeasurementTime(Features featureType, FeatureModel feature,CMMModel CMM)
+    {
+        double output = 0;
+
+        switch(featureType)
+        {
+            case Features.CIRCLE:
+                CircleModel circle = (CircleModel)feature;
+                output += GetClearanceMoveTime(circle, CMM);
+                output += GetMoveToFeatureTime(circle, CMM);
+                output += circle.GetCircleMeasurementTime(circle, CMM);
+                startPoint = new PointModel(circle.Coordinates["x-axis"], circle.Coordinates["y-axis"], circle.Coordinates["z-axis"],
+                    circle.Vectors["x-axis"], circle.Vectors["x-axis"], circle.Vectors["x-axis"]);
+                break;
+        }
+
+        return output;
+    }
+
     private double GetMeasurementTime(Features featureType, ProgramModes measurementMode, List<string> measurementBlock, CMMModel CMM1)
     {
         double output = 0;
@@ -77,6 +96,30 @@ public class CMMController
                     output += arc.GetCircleMeasurementTime(arc, CMM1);
                     startPoint = new PointModel(arc.Coordinates["x-axis"], arc.Coordinates["y-axis"], arc.Coordinates["z-axis"],
                         arc.Vectors["x-axis"], arc.Vectors["x-axis"], arc.Vectors["x-axis"]);
+                    break;
+                case Features.CYLNDR:
+                    CylinderModel cylinder = new CylinderModel(0, 0, 0, 0, 0, 0, 0, 0, 0);
+                    cylinder = cylinder.GetCylinderFromMeasurementBlock(measurementBlock);
+                    PointModel circleCenter = GetPointAtDistanceFrom(new PointModel(
+                        cylinder.Coordinates["x-axis"],
+                        cylinder.Coordinates["y-axis"],
+                        cylinder.Coordinates["z-axis"],
+                        cylinder.Vectors["x-axis"],
+                        cylinder.Vectors["y-axis"],
+                        cylinder.Vectors["z-axis"]),
+                        CMM1.Settings["DEPTH"]);
+                    CircleModel circleFromCylinder = new CircleModel(circleCenter, cylinder.Diameter, cylinder.NumberOfDivisions / 2);
+                    output += GetFeatureMeasurementTime(Features.CIRCLE, circleFromCylinder, CMM1);
+                    circleCenter = GetPointAtDistanceFrom(new PointModel(
+                        cylinder.Coordinates["x-axis"],
+                        cylinder.Coordinates["y-axis"],
+                        cylinder.Coordinates["z-axis"],
+                        cylinder.Vectors["x-axis"],
+                        cylinder.Vectors["y-axis"],
+                        cylinder.Vectors["z-axis"]),
+                        cylinder.Length < 0 ? cylinder.Length + CMM1.Settings["DEPTH"] : cylinder.Length - CMM1.Settings["DEPTH"]);
+                    circleFromCylinder = new CircleModel(circleCenter, cylinder.Diameter, cylinder.NumberOfDivisions / 2);
+                    output += GetFeatureMeasurementTime(Features.CIRCLE, circleFromCylinder, CMM1);
                     break;
                 default:
                     throw new Exception($"Feature simulation not implemented {featureType}");

@@ -11,14 +11,29 @@ public class CircleModel : FeatureModel
     public double Diameter { get; set; }
     public double Length { get; set; }
     public int NumberOfDivisions { get; set; }
-    public CircleModel(double x, double y, double z, double i, double j, double k, double diameter, int numberOfDivisions, double length = 0) : base(x,y,z,i,j,k)
+
+    public CircleModel() { }
+
+    public CircleModel(double x, double y, double z, double i, double j, double k, double diameter, int numberOfDivisions) : base(x,y,z,i,j,k)
     {
         Diameter = diameter;
-        Length = length;
         NumberOfDivisions = numberOfDivisions;
     }
 
-    int GetNumberOfCircleDivisions(string circleMeasurementBlock)
+    public CircleModel(PointModel point, double diameter, int numberOfDivisions)
+    {
+        Diameter = diameter;
+        NumberOfDivisions = numberOfDivisions;
+        this.Coordinates["x-axis"] = point.Coordinates["x-axis"];
+        this.Coordinates["y-axis"] = point.Coordinates["y-axis"];
+        this.Coordinates["z-axis"] = point.Coordinates["z-axis"];
+        this.Vectors["x-axis"] = point.Vectors["x-axis"];
+        this.Vectors["y-axis"] = point.Vectors["y-axis"];
+        this.Vectors["z-axis"] = point.Vectors["z-axis"];
+
+    }
+
+    internal int GetNumberOfCircleDivisions(string circleMeasurementBlock)
     {
         int output = int.Parse(circleMeasurementBlock.Split(',')[2]);
 
@@ -40,7 +55,7 @@ public class CircleModel : FeatureModel
         double output = 0;
 
         string[] circleAxis = circle.Vectors.Where(x => x.Value != 1).ToDictionary(x => x.Key, x => x.Value).Keys.ToArray();
-        var orderedVectors = circle.Vectors.OrderBy(x => x.Value).ToList();
+        var orderedVectors = circle.Vectors.OrderBy(x => Math.Abs(x.Value)).ToList();
         string circleDirection = orderedVectors[2].Key;
         //circleDirection = circle.Vectors.Where(x => x.Value == 1).ToList().First().Key;
 
