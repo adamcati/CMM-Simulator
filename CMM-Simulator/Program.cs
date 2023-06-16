@@ -10,7 +10,7 @@ CMMController controller = new CMMController();
 //measurement time is in seconds
 double measurementTime = 0;
 
-List<string> fileLines = FileHandler.ReadAllNonEmptyLines("C:\\Users\\Adam\\Documents\\cylinder.DMI");
+List<string> fileLines = FileHandler.ReadAllNonEmptyLines("C:\\Users\\Adam\\Documents\\141A3505-115_REV_A_1F.DMI");
 fileLines.RemoveTextOutfilFromFileLines();
 fileLines.RemoveOutputsFromFileLines();
 fileLines.RemoveCommentsFromFileLines();
