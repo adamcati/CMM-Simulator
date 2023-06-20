@@ -83,11 +83,6 @@ public class CMMController
                     output += GetFeatureMeasurementTime(Features.CIRCLE, circle, CMM1);
                     SetStartPoint(circle);
                     break;
-                case Features.POINT:
-                    double[] data = FeatureModel.GetFeatureData(measurementBlock.First());
-                    PointModel pointToMeasure = new PointModel(data[0], data[1], data[2], data[3], data[4], data[5]);
-                    output += GetFeatureMeasurementTime(Features.POINT, pointToMeasure, CMM1);
-                    break;
                 case Features.ARC:
                     CircleModel arc = new CircleModel(0, 0, 0, 0, 0, 0, 0, 0);
                     arc = arc.GetCircleFromMeasurementBlock(measurementBlock);
@@ -118,6 +113,23 @@ public class CMMController
                         cylinder.Length < 0 ? cylinder.Length + CMM1.Settings["DEPTH"] : cylinder.Length - CMM1.Settings["DEPTH"]);
                     circleFromCylinder = new CircleModel(circleCenter, cylinder.Diameter, cylinder.NumberOfDivisions / 2);
                     output += GetFeatureMeasurementTime(Features.CIRCLE, circleFromCylinder, CMM1);
+                    break;
+                case Features.POINT:
+                    double[] data = FeatureModel.GetFeatureData(measurementBlock.First());
+                    PointModel pointToMeasure = new PointModel(data[0], data[1], data[2], data[3], data[4], data[5]);
+                    output += GetFeatureMeasurementTime(Features.POINT, pointToMeasure, CMM1);
+                    break;
+                case Features.EDGEPT:
+                    double[] edgePointData = FeatureModel.GetFeatureData(measurementBlock.First());
+                    PointModel edgePoint = new PointModel(edgePointData[0], edgePointData[1], edgePointData[2], edgePointData[3], edgePointData[4], edgePointData[5]);
+                    output += GetFeatureMeasurementTime(Features.POINT, edgePoint, CMM1);
+                    break;
+                case Features.CPARLN:
+                    double[] slotData = FeatureModel.GetFeatureData(measurementBlock.First());
+                    SlotModel slot = new SlotModel();
+                    slot = slot.GetSlotFromMeasurementBlock(measurementBlock);
+                    output += GetMoveToFeatureTime(slot, CMM1);
+                    output += slot.GetSlotMeasurementTime(slot, CMM1);
                     break;
                 default:
                     throw new Exception($"Feature simulation not implemented {featureType}");

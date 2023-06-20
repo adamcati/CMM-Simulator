@@ -10,6 +10,7 @@ public class FeatureModel
 {
     public Dictionary<string, double> Coordinates { get; }
     public Dictionary<string, double> Vectors { get; }
+    public bool IsInner { get; }
 
     public FeatureModel() 
     {
@@ -31,6 +32,23 @@ public class FeatureModel
             { "y-axis", j },
             { "z-axis", k }
         };
+    }
+
+    public FeatureModel(double x, double y, double z, double i, double j, double k,bool isInner)
+    {
+        Coordinates = new Dictionary<string, double>
+        {
+            { "x-axis", x },
+            { "y-axis", y },
+            { "z-axis", z }
+        };
+        Vectors = new Dictionary<string, double>
+        {
+            { "x-axis", i },
+            { "y-axis", j },
+            { "z-axis", k }
+        };
+        IsInner = isInner;
     }
 
     public static Features GetFeatureType(string measurementLine)
@@ -61,5 +79,13 @@ public class FeatureModel
         }
 
         return output.ToArray();
+    }
+
+    public int GetNumberOfMeasurementPoints(string measurementLine)
+    {
+        //number of measurement points is always the third element from the measurement line code
+        int output = int.Parse(measurementLine.Split(',')[2]);
+
+        return output;
     }
 }
