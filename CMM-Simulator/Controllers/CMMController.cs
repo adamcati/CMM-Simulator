@@ -39,7 +39,7 @@ public class CMMController
         return output;
     }
 
-    private double GetFeatureMeasurementTime(Features featureType, FeatureModel feature,CMMModel CMM)
+    public double GetFeatureMeasurementTime(Features featureType, FeatureModel feature,CMMModel CMM)
     {
         double output = 0;
 
@@ -52,15 +52,22 @@ public class CMMController
                 SetStartPoint(circle);
                 output += circle.GetCircleMeasurementTime(circle, CMM);
                 break;
+            case Features.CYLNDR:
+                CylinderModel cylinder = (CylinderModel)feature;
+                output += GetClearanceMoveTime(cylinder, CMM);
+                output += GetMoveToFeatureTime(cylinder, CMM);
+                SetStartPoint(cylinder);
+                output += cylinder.GetCylinderMeasurementTime(cylinder, CMM);
+                break;
             case Features.POINT:
                 PointModel pointToMeasure = (PointModel)feature;
                 output += GetClearanceMoveTime(pointToMeasure, CMM);
                 output += GetMoveToFeatureTime(pointToMeasure, CMM);
                 SetStartPoint(pointToMeasure);
-                PointModel pointAtApproachDistance = GetPointAtDistanceFrom(pointToMeasure, CMM.Settings["APPRCH"]);
+                PointModel pointAtApproachDistance = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM.Settings["APPRCH"]);
                 output += GetDiagonalMoveToPointTime(StartPoint, pointAtApproachDistance, CMM);
                 output += GetSinglePointMeasurementTime(pointAtApproachDistance, pointToMeasure, CMM);
-                PointModel pointAtRetractDistance = GetPointAtDistanceFrom(pointToMeasure, CMM.Settings["RETRCT"]);
+                PointModel pointAtRetractDistance = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM.Settings["RETRCT"]);
                 output += GetRetractFromPointTime(pointToMeasure, pointAtRetractDistance, CMM);
                 SetStartPoint(pointAtRetractDistance);
                 break;
@@ -93,26 +100,7 @@ public class CMMController
                 case Features.CYLNDR:
                     CylinderModel cylinder = new CylinderModel(0, 0, 0, 0, 0, 0, 0, 0, 0);
                     cylinder = cylinder.GetCylinderFromMeasurementBlock(measurementBlock);
-                    PointModel circleCenter = GetPointAtDistanceFrom(new PointModel(
-                        cylinder.Coordinates["x-axis"],
-                        cylinder.Coordinates["y-axis"],
-                        cylinder.Coordinates["z-axis"],
-                        cylinder.Vectors["x-axis"],
-                        cylinder.Vectors["y-axis"],
-                        cylinder.Vectors["z-axis"]),
-                        CMM1.Settings["DEPTH"]);
-                    CircleModel circleFromCylinder = new CircleModel(circleCenter, cylinder.Diameter, cylinder.NumberOfDivisions / 2);
-                    output += GetFeatureMeasurementTime(Features.CIRCLE, circleFromCylinder, CMM1);
-                    circleCenter = GetPointAtDistanceFrom(new PointModel(
-                        cylinder.Coordinates["x-axis"],
-                        cylinder.Coordinates["y-axis"],
-                        cylinder.Coordinates["z-axis"],
-                        cylinder.Vectors["x-axis"],
-                        cylinder.Vectors["y-axis"],
-                        cylinder.Vectors["z-axis"]),
-                        cylinder.Length < 0 ? cylinder.Length + CMM1.Settings["DEPTH"] : cylinder.Length - CMM1.Settings["DEPTH"]);
-                    circleFromCylinder = new CircleModel(circleCenter, cylinder.Diameter, cylinder.NumberOfDivisions / 2);
-                    output += GetFeatureMeasurementTime(Features.CIRCLE, circleFromCylinder, CMM1);
+                    output += GetFeatureMeasurementTime(Features.CYLNDR, cylinder,CMM1);
                     break;
                 case Features.POINT:
                     double[] data = FeatureModel.GetFeatureData(measurementBlock.First());
@@ -144,10 +132,10 @@ public class CMMController
                 {
                     double[] data = FeatureModel.GetFeatureData(block);
                     PointModel pointToMeasure = new PointModel(data[0], data[1], data[2], data[3], data[4], data[5]);
-                    PointModel endPoint = GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings["APPRCH"]);
+                    PointModel endPoint = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings["APPRCH"]);
                     output += GetDiagonalMoveToPointTime(StartPoint, endPoint, CMM1);
                     output += GetSinglePointMeasurementTime(endPoint, pointToMeasure, CMM1);
-                    endPoint = GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings["RETRCT"]);
+                    endPoint = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings["RETRCT"]);
                     output += GetRetractFromPointTime(pointToMeasure, endPoint, CMM1);
                     SetStartPoint(pointToMeasure);
                 }
@@ -181,26 +169,6 @@ public class CMMController
         double output;
 
         output = Physics.GetTimeToTravelDistance(CMM1.Settings["APPRCH"], CMM1.TouchSpeed, CMM1.Acceleration[axis]);
-
-        return output;
-    }
-
-    PointModel GetPointAtDistanceFrom(PointModel point, double distance)
-    {
-        PointModel output = new PointModel(0,0,0,0,0,0);
-        double magnitude = Math.Sqrt(point.Vectors["x-axis"] * point.Vectors["x-axis"] +
-            point.Vectors["y-axis"] * point.Vectors["y-axis"] +
-            point.Vectors["z-axis"] * point.Vectors["z-axis"]);
-        double unitVector = 0;
-        double displacementVector = 0;
-
-        foreach (string axis in point.Vectors.Keys)
-        {
-            unitVector = point.Vectors[axis] / magnitude;
-            displacementVector = distance * unitVector;
-            output.Vectors[axis] = displacementVector;
-            output.Coordinates[axis] = point.Coordinates[axis] + displacementVector;
-        }
 
         return output;
     }
@@ -267,7 +235,7 @@ public class CMMController
             {
                 goToPoint.Vectors["z-axis"] = goToData[3];
             }
-            PointModel endPoint = GetPointAtDistanceFrom(goToPoint, distanceToTravel);
+            PointModel endPoint = Library3D.GetPointAtDistanceFrom(goToPoint, distanceToTravel);
             output += GetDiagonalMoveToPointTime(StartPoint, endPoint, CMM1);
             SetStartPoint(endPoint);
         }   
@@ -346,7 +314,7 @@ public class CMMController
             featureToMeasure.Vectors["y-axis"] != 0 ? CMM1.Velocity["y-axis"] : 0,
             featureToMeasure.Vectors["z-axis"] != 0 ? CMM1.Velocity["z-axis"] : 0);
 
-        PointModel endpoint = GetPointAtDistanceFrom(StartPoint, CMM1.Settings["CLRSRF"]);
+        PointModel endpoint = Library3D.GetPointAtDistanceFrom(StartPoint, CMM1.Settings["CLRSRF"]);
         distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
             StartPoint.Coordinates["x-axis"], endpoint.Coordinates["x-axis"],
             StartPoint.Coordinates["y-axis"], endpoint.Coordinates["y-axis"],

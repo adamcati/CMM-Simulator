@@ -18,4 +18,24 @@ public class Library3D
     {
         return Math.Sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1));
     }
+
+    public static PointModel GetPointAtDistanceFrom(PointModel point, double distance)
+    {
+        PointModel output = new PointModel(0, 0, 0, 0, 0, 0);
+        double magnitude = Math.Sqrt(point.Vectors["x-axis"] * point.Vectors["x-axis"] +
+            point.Vectors["y-axis"] * point.Vectors["y-axis"] +
+            point.Vectors["z-axis"] * point.Vectors["z-axis"]);
+        double unitVector = 0;
+        double displacementVector = 0;
+
+        foreach (string axis in point.Vectors.Keys)
+        {
+            unitVector = point.Vectors[axis] / magnitude;
+            displacementVector = distance * unitVector;
+            output.Vectors[axis] = displacementVector;
+            output.Coordinates[axis] = point.Coordinates[axis] + displacementVector;
+        }
+
+        return output;
+    }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CMM_Simulator.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,5 +22,33 @@ public class CylinderModel : CircleModel
         CylinderModel cylinder = new CylinderModel(circleData[0], circleData[1], circleData[2], circleData[3], circleData[4], circleData[5], circleData[6], numberOfDivisions, circleData[7]);
 
         return cylinder;
+    }
+
+    public double GetCylinderMeasurementTime(CylinderModel cylinder, CMMModel CMM)
+    {
+        double output = 0;
+
+        PointModel circleCenter = Library3D.GetPointAtDistanceFrom(new PointModel(
+            cylinder.Coordinates["x-axis"],
+            cylinder.Coordinates["y-axis"],
+            cylinder.Coordinates["z-axis"],
+            cylinder.Vectors["x-axis"],
+            cylinder.Vectors["y-axis"],
+            cylinder.Vectors["z-axis"]),
+            CMM.Settings["DEPTH"]);
+        CircleModel circleFromCylinder = new CircleModel(circleCenter, cylinder.Diameter, cylinder.NumberOfDivisions / 2);
+        output += GetCircleMeasurementTime(circleFromCylinder, CMM);
+        circleCenter = Library3D.GetPointAtDistanceFrom(new PointModel(
+            cylinder.Coordinates["x-axis"],
+            cylinder.Coordinates["y-axis"],
+            cylinder.Coordinates["z-axis"],
+            cylinder.Vectors["x-axis"],
+            cylinder.Vectors["y-axis"],
+            cylinder.Vectors["z-axis"]),
+            cylinder.Length < 0 ? cylinder.Length + CMM.Settings["DEPTH"] : cylinder.Length - CMM.Settings["DEPTH"]);
+        circleFromCylinder = new CircleModel(circleCenter, cylinder.Diameter, cylinder.NumberOfDivisions / 2);
+        output += GetCircleMeasurementTime(circleFromCylinder, CMM);
+
+        return output;
     }
 }
