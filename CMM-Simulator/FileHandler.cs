@@ -47,6 +47,10 @@ public static class FileHandler
     {
         fileLines.RemoveAll(line => line.StartsWith("OUTPUT"));
     }
+    public static void RemoveTolerancesFromFileLines(this List<string> fileLines)
+    {
+        fileLines.RemoveAll(line => line.StartsWith("T("));
+    }
 
     public static void RemoveCommentsFromFileLines(this List<string> fileLines)
     {
@@ -63,7 +67,6 @@ public static class FileHandler
                 if (fileLines[currentIndex + 1].Contains("CONST"))
                 {
                     fileLines.RemoveRange(currentIndex, 2);
-                    currentIndex++;
                 }
             }
             currentIndex++;
@@ -73,19 +76,21 @@ public static class FileHandler
     public static void RemoveMultipleLineCode(this List<string> fileLines)
     {
         int currentIndex = 0;
+        int originalLineIndex;
         string newLine = "";
 
         while (currentIndex < fileLines.Count)
         {
             if (fileLines[currentIndex].EndsWith('$'))
             {
+                originalLineIndex = currentIndex;
                 while (fileLines[currentIndex].EndsWith('$'))
                 {
                     newLine += fileLines[currentIndex].TrimEnd('$');
                     fileLines.RemoveAt(currentIndex);
                 }
                 newLine += fileLines[currentIndex];
-                fileLines[currentIndex] = newLine;
+                fileLines[originalLineIndex] = newLine;
                 newLine = "";
             }
             currentIndex++;
