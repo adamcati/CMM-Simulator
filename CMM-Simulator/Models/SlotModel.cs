@@ -45,24 +45,24 @@ public class SlotModel : FeatureModel
         {
             if(slot.IsRound)
             {
-                double slotArcCenterX1 = slot.Coordinates["x-axis"] + (slot.Length - slot.Width) / 2;
-                double slotArcCenterX2 = slot.Coordinates["x-axis"] - (slot.Length - slot.Width) / 2;
+                double slotArcCenterX1 = slot.Coordinates.XAxis + (slot.Length - slot.Width) / 2;
+                double slotArcCenterX2 = slot.Coordinates.XAxis - (slot.Length - slot.Width) / 2;
                 CircleModel arc1 = new CircleModel(
                     slotArcCenterX1,
-                    slot.Coordinates["y-axis"],
-                    slot.Coordinates["z-axis"],
-                    slot.Vectors["x-axis"],
-                    slot.Vectors["y-axis"],
-                    slot.Vectors["z-axis"],
+                    slot.Coordinates.YAxis,
+                    slot.Coordinates.ZAxis,
+                    slot.Vectors.XAxis,
+                    slot.Vectors.YAxis,
+                    slot.Vectors.ZAxis,
                     slot.Width,
                     slot.NumberOfDivisons / 2);
                 CircleModel arc2 = new CircleModel(
                     slotArcCenterX2,
-                    slot.Coordinates["y-axis"],
-                    slot.Coordinates["z-axis"],
-                    slot.Vectors["x-axis"],
-                    slot.Vectors["y-axis"],
-                    slot.Vectors["z-axis"],
+                    slot.Coordinates.YAxis,
+                    slot.Coordinates.ZAxis,
+                    slot.Vectors.XAxis,
+                    slot.Vectors.YAxis,
+                    slot.Vectors.ZAxis,
                     slot.Width,
                     slot.NumberOfDivisons / 2);
 
@@ -81,18 +81,18 @@ public class SlotModel : FeatureModel
 
         double distanceToTravel;
         double diagonalAcceleration = Physics.GetDiagonalAcceleration(
-            arc2.Vectors["x-axis"] != 0 ? CMM.Acceleration["x-axis"] : 0,
-            arc2.Vectors["y-axis"] != 0 ? CMM.Acceleration["y-axis"] : 0,
-            arc2.Vectors["z-axis"] != 0 ? CMM.Acceleration["z-axis"] : 0);
+            arc2.Vectors.XAxis != 0 ? CMM.Acceleration.XAxis : 0,
+            arc2.Vectors.YAxis != 0 ? CMM.Acceleration.YAxis : 0,
+            arc2.Vectors.ZAxis != 0 ? CMM.Acceleration.ZAxis : 0);
         double diagonalVelocity = Physics.GetDiagonalAcceleration(
-            arc2.Vectors["x-axis"] != 0 ? CMM.Velocity["x-axis"] : 0,
-            arc2.Vectors["y-axis"] != 0 ? CMM.Velocity["y-axis"] : 0,
-            arc2.Vectors["z-axis"] != 0 ? CMM.Velocity["z-axis"] : 0);
+            arc2.Vectors.XAxis != 0 ? CMM.Velocity.XAxis : 0,
+            arc2.Vectors.YAxis != 0 ? CMM.Velocity.YAxis : 0,
+            arc2.Vectors.ZAxis != 0 ? CMM.Velocity.ZAxis : 0);
 
         distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
-            arc1.Coordinates["x-axis"], arc2.Coordinates["x-axis"],
-            arc1.Coordinates["y-axis"], arc2.Coordinates["y-axis"],
-            arc1.Coordinates["z-axis"], arc2.Coordinates["z-axis"]);
+            arc1.Coordinates.XAxis, arc2.Coordinates.XAxis,
+            arc1.Coordinates.YAxis, arc2.Coordinates.YAxis,
+            arc1.Coordinates.ZAxis, arc2.Coordinates.ZAxis);
 
         output += Physics.GetTimeToTravelDistance(distanceToTravel, diagonalVelocity, diagonalAcceleration);
 

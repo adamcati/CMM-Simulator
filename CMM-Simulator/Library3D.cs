@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,19 +23,29 @@ public class Library3D
     public static PointModel GetPointAtDistanceFrom(PointModel point, double distance)
     {
         PointModel output = new PointModel(0, 0, 0, 0, 0, 0);
-        double magnitude = Math.Sqrt(point.Vectors["x-axis"] * point.Vectors["x-axis"] +
-            point.Vectors["y-axis"] * point.Vectors["y-axis"] +
-            point.Vectors["z-axis"] * point.Vectors["z-axis"]);
+        double magnitude = Math.Sqrt(point.Vectors.XAxis * point.Vectors.XAxis +
+            point.Vectors.YAxis * point.Vectors.YAxis +
+            point.Vectors.ZAxis * point.Vectors.ZAxis);
         double unitVector = 0;
         double displacementVector = 0;
 
-        foreach (string axis in point.Vectors.Keys)
-        {
-            unitVector = point.Vectors[axis] / magnitude;
-            displacementVector = distance * unitVector;
-            output.Vectors[axis] = displacementVector;
-            output.Coordinates[axis] = point.Coordinates[axis] + displacementVector;
-        }
+        //X-axis
+        unitVector = point.Vectors.XAxis / magnitude;
+        displacementVector = distance * unitVector;
+        output.Vectors.XAxis = displacementVector;
+        output.Coordinates.XAxis = point.Coordinates.XAxis + displacementVector;
+
+        //Y-axis
+        unitVector = point.Vectors.YAxis / magnitude;
+        displacementVector = distance * unitVector;
+        output.Vectors.YAxis = displacementVector;
+        output.Coordinates.YAxis = point.Coordinates.YAxis + displacementVector;
+
+        //Z-axis
+        unitVector = point.Vectors.ZAxis / magnitude;
+        displacementVector = distance * unitVector;
+        output.Vectors.ZAxis = displacementVector;
+        output.Coordinates.ZAxis = point.Coordinates.ZAxis + displacementVector;
 
         return output;
     }

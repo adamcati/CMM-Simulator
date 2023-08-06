@@ -8,45 +8,45 @@ using System.Threading.Tasks;
 namespace CMM_Simulator.Models;
 public class FeatureModel
 {
-    public Dictionary<string, double> Coordinates { get; }
-    public Dictionary<string, double> Vectors { get; }
+    public CoordinatesModel Coordinates { get; }
+    public VectorsModel Vectors { get; }
     public bool IsInner { get; }
 
     public FeatureModel() 
     {
-        Coordinates = new Dictionary<string, double>();
-        Vectors = new Dictionary<string, double>();
+        Coordinates = new CoordinatesModel();
+        Vectors = new VectorsModel();
     }
 
     public FeatureModel(double x, double y, double z, double i, double j, double k)
     {
-        Coordinates = new Dictionary<string, double>
+        Coordinates = new CoordinatesModel()
         {
-            { "x-axis", x },
-            { "y-axis", y },
-            { "z-axis", z }
+            XAxis = x,
+            YAxis = y,
+            ZAxis = z,
         };
-        Vectors = new Dictionary<string, double>
+        Vectors = new VectorsModel()
         {
-            { "x-axis", i },
-            { "y-axis", j },
-            { "z-axis", k }
+            XAxis = i,
+            YAxis = j,
+            ZAxis = k
         };
     }
 
     public FeatureModel(double x, double y, double z, double i, double j, double k,bool isInner)
     {
-        Coordinates = new Dictionary<string, double>
+        Coordinates = new CoordinatesModel()
         {
-            { "x-axis", x },
-            { "y-axis", y },
-            { "z-axis", z }
+            XAxis = x,
+            YAxis = y,
+            ZAxis = z,
         };
-        Vectors = new Dictionary<string, double>
+        Vectors = new VectorsModel()
         {
-            { "x-axis", i },
-            { "y-axis", j },
-            { "z-axis", k }
+            XAxis = i,
+            YAxis = j,
+            ZAxis = k
         };
         IsInner = isInner;
     }
