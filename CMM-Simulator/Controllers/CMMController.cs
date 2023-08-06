@@ -147,28 +147,25 @@ public class CMMController
 
     private void SetStartPoint(FeatureModel currentLocationPoint)
     {
-        StartPoint = new PointModel(currentLocationPoint.Coordinates["x-axis"], currentLocationPoint.Coordinates["y-axis"], currentLocationPoint.Coordinates["z-axis"],
-                        currentLocationPoint.Vectors["x-axis"], currentLocationPoint.Vectors["y-axis"], currentLocationPoint.Vectors["z-axis"]);
+        StartPoint = new PointModel(currentLocationPoint.Coordinates.XAxis, currentLocationPoint.Coordinates.YAxis, currentLocationPoint.Coordinates.ZAxis,
+                        currentLocationPoint.Vectors.XAxis, currentLocationPoint.Vectors.YAxis, currentLocationPoint.Vectors.ZAxis);
     }
 
     private double GetMoveToFeatureTime(FeatureModel feature, CMMModel CMM1)
     {
         double output = 0;
 
-        foreach(string axis in feature.Coordinates.Keys)
-        {
-            double distanceToTravel = Library3D.GetLinearDistance(StartPoint.Coordinates[axis], feature.Coordinates[axis]);
-            output += Physics.GetTimeToTravelDistance(distanceToTravel, CMM1.Velocity[axis], CMM1.Acceleration[axis]);
-        }
+        //X-axis
+        double distanceToTravel = Library3D.GetLinearDistance(StartPoint.Coordinates.XAxis, feature.Coordinates.XAxis);
+        output += Physics.GetTimeToTravelDistance(distanceToTravel, CMM1.Velocity.XAxis, CMM1.Acceleration.XAxis);
 
-        return output;
-    }
+        //Y-axis
+        distanceToTravel = Library3D.GetLinearDistance(StartPoint.Coordinates.YAxis, feature.Coordinates.YAxis);
+        output += Physics.GetTimeToTravelDistance(distanceToTravel, CMM1.Velocity.YAxis, CMM1.Acceleration.YAxis);
 
-    private double GetTimeToApproach(string axis, CMMModel CMM1)
-    {
-        double output;
-
-        output = Physics.GetTimeToTravelDistance(CMM1.Settings["APPRCH"], CMM1.TouchSpeed, CMM1.Acceleration[axis]);
+        //Z-axis
+        distanceToTravel = Library3D.GetLinearDistance(StartPoint.Coordinates.ZAxis, feature.Coordinates.ZAxis);
+        output += Physics.GetTimeToTravelDistance(distanceToTravel, CMM1.Velocity.ZAxis, CMM1.Acceleration.ZAxis);
 
         return output;
     }
@@ -202,11 +199,11 @@ public class CMMController
         {
             PointModel goTo = new PointModel(goToData[0], goToData[1], goToData[2], 0, 0, 0);
             double distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
-                0, goTo.Coordinates["x-axis"],
-                0, goTo.Coordinates["y-axis"],
-                0, goTo.Coordinates["z-axis"]);
-            double diagonalVelocity = Physics.GetDiagonalVelocity(CMM1.Velocity["x-axis"], CMM1.Velocity["y-axis"], CMM1.Velocity["z-axis"]);
-            double diagonalAcceleration = Physics.GetDiagonalVelocity(CMM1.Acceleration["x-axis"], CMM1.Acceleration["y-axis"], CMM1.Acceleration["z-axis"]);
+                0, goTo.Coordinates.XAxis,
+                0, goTo.Coordinates.YAxis,
+                0, goTo.Coordinates.XAxis);
+            double diagonalVelocity = Physics.GetDiagonalVelocity(CMM1.Velocity.ZAxis, CMM1.Velocity.YAxis, CMM1.Velocity.ZAxis);
+            double diagonalAcceleration = Physics.GetDiagonalVelocity(CMM1.Acceleration.XAxis, CMM1.Acceleration.YAxis, CMM1.Acceleration.ZAxis);
 
             output += Physics.GetTimeToTravelDistance(distanceToTravel, diagonalVelocity, diagonalAcceleration);
             SetStartPoint(goTo);
@@ -216,24 +213,24 @@ public class CMMController
             double distanceToTravel = goToData[0];
             PointModel goToPoint =
                 new PointModel(
-                StartPoint.Coordinates["x-axis"],
-                StartPoint.Coordinates["y-axis"],
-                StartPoint.Coordinates["z-axis"],
+                StartPoint.Coordinates.XAxis,
+                StartPoint.Coordinates.YAxis,
+                StartPoint.Coordinates.ZAxis,
                 0,
                 0,
                 0);
 
             if (goToData[1] != 0)
             {
-                goToPoint.Vectors["x-axis"] = goToData[1];
+                goToPoint.Vectors.XAxis = goToData[1];
             }
             if (goToData[2] != 0)
             {
-                goToPoint.Vectors["y-axis"] = goToData[2];
+                goToPoint.Vectors.YAxis = goToData[2];
             }
             if (goToData[3] != 0)
             {
-                goToPoint.Vectors["z-axis"] = goToData[3];
+                goToPoint.Vectors.ZAxis = goToData[3];
             }
             PointModel endPoint = Library3D.GetPointAtDistanceFrom(goToPoint, distanceToTravel);
             output += GetDiagonalMoveToPointTime(StartPoint, endPoint, CMM1);
@@ -252,14 +249,14 @@ public class CMMController
         double distanceToTravel;
 
         double diagonalAcceleration = Physics.GetDiagonalAcceleration(
-            endPoint.Vectors["x-axis"] != 0 ? CMM1.Acceleration["x-axis"] : 0,
-            endPoint.Vectors["y-axis"] != 0 ? CMM1.Acceleration["y-axis"] : 0,
-            endPoint.Vectors["z-axis"] != 0 ? CMM1.Acceleration["z-axis"] : 0);
+            endPoint.Vectors.XAxis != 0 ? CMM1.Acceleration.XAxis : 0,
+            endPoint.Vectors.YAxis != 0 ? CMM1.Acceleration.YAxis : 0,
+            endPoint.Vectors.ZAxis != 0 ? CMM1.Acceleration.ZAxis : 0);
 
         distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
-            startPoint.Coordinates["x-axis"], endPoint.Coordinates["x-axis"],
-            startPoint.Coordinates["y-axis"], endPoint.Coordinates["y-axis"],
-            startPoint.Coordinates["z-axis"], endPoint.Coordinates["z-axis"]);
+            startPoint.Coordinates.XAxis, endPoint.Coordinates.XAxis,
+            startPoint.Coordinates.YAxis, endPoint.Coordinates.YAxis,
+            startPoint.Coordinates.ZAxis, endPoint.Coordinates.ZAxis);
 
         output += Physics.GetTimeToTravelDistance(distanceToTravel, CMM1.TouchSpeed, diagonalAcceleration);
 
@@ -272,18 +269,18 @@ public class CMMController
 
         double distanceToTravel;
         double diagonalAcceleration = Physics.GetDiagonalAcceleration(
-            endPoint.Vectors["x-axis"] != 0 ? CMM1.Acceleration["x-axis"] : 0,
-            endPoint.Vectors["y-axis"] != 0 ? CMM1.Acceleration["y-axis"] : 0,
-            endPoint.Vectors["z-axis"] != 0 ? CMM1.Acceleration["z-axis"] : 0);
+            endPoint.Vectors.XAxis != 0 ? CMM1.Acceleration.XAxis : 0,
+            endPoint.Vectors.YAxis != 0 ? CMM1.Acceleration.YAxis : 0,
+            endPoint.Vectors.ZAxis != 0 ? CMM1.Acceleration.ZAxis : 0);
         double diagonalVelocity = Physics.GetDiagonalAcceleration(
-            endPoint.Vectors["x-axis"] != 0 ? CMM1.Velocity["x-axis"] : 0,
-            endPoint.Vectors["y-axis"] != 0 ? CMM1.Velocity["y-axis"] : 0,
-            endPoint.Vectors["z-axis"] != 0 ? CMM1.Velocity["z-axis"] : 0);
+            endPoint.Vectors.XAxis != 0 ? CMM1.Velocity.XAxis : 0,
+            endPoint.Vectors.YAxis != 0 ? CMM1.Velocity.YAxis : 0,
+            endPoint.Vectors.ZAxis != 0 ? CMM1.Velocity.ZAxis : 0);
 
         distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
-            startPoint.Coordinates["x-axis"], endPoint.Coordinates["x-axis"],
-            startPoint.Coordinates["y-axis"], endPoint.Coordinates["y-axis"],
-            startPoint.Coordinates["z-axis"], endPoint.Coordinates["z-axis"]);
+            startPoint.Coordinates.XAxis, endPoint.Coordinates.XAxis,
+            startPoint.Coordinates.YAxis, endPoint.Coordinates.YAxis,
+            startPoint.Coordinates.ZAxis, endPoint.Coordinates.ZAxis);
 
         output += Physics.GetTimeToTravelDistance(distanceToTravel, diagonalVelocity, diagonalAcceleration);
 
@@ -293,9 +290,9 @@ public class CMMController
     private double GetRetractFromPointTime(PointModel pointToMeasure, PointModel endPoint, CMMModel CMM1)
     {
         double distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
-            pointToMeasure.Coordinates["x-axis"], endPoint.Coordinates["x-axis"],
-            pointToMeasure.Coordinates["y-axis"], endPoint.Coordinates["y-axis"],
-            pointToMeasure.Coordinates["z-axis"], endPoint.Coordinates["z-axis"]);
+            pointToMeasure.Coordinates.XAxis, endPoint.Coordinates.XAxis,
+            pointToMeasure.Coordinates.YAxis, endPoint.Coordinates.YAxis,
+            pointToMeasure.Coordinates.ZAxis, endPoint.Coordinates.ZAxis);
 
         return Physics.GetTimeToTravelDistance(distanceToTravel, CMM1.RetractSpeed, CMM1.RetractAcceleration);
     }
@@ -306,19 +303,19 @@ public class CMMController
 
         double distanceToTravel;
         double diagonalAcceleration = Physics.GetDiagonalAcceleration(
-            featureToMeasure.Vectors["x-axis"] != 0 ? CMM1.Acceleration["x-axis"] : 0,
-            featureToMeasure.Vectors["y-axis"] != 0 ? CMM1.Acceleration["y-axis"] : 0,
-            featureToMeasure.Vectors["z-axis"] != 0 ? CMM1.Acceleration["z-axis"] : 0);
+            featureToMeasure.Vectors.XAxis != 0 ? CMM1.Acceleration.XAxis : 0,
+            featureToMeasure.Vectors.YAxis != 0 ? CMM1.Acceleration.YAxis : 0,
+            featureToMeasure.Vectors.ZAxis != 0 ? CMM1.Acceleration.ZAxis : 0);
         double diagonalVelocity = Physics.GetDiagonalAcceleration(
-            featureToMeasure.Vectors["x-axis"] != 0 ? CMM1.Velocity["x-axis"] : 0,
-            featureToMeasure.Vectors["y-axis"] != 0 ? CMM1.Velocity["y-axis"] : 0,
-            featureToMeasure.Vectors["z-axis"] != 0 ? CMM1.Velocity["z-axis"] : 0);
+            featureToMeasure.Vectors.XAxis != 0 ? CMM1.Velocity.XAxis : 0,
+            featureToMeasure.Vectors.YAxis != 0 ? CMM1.Velocity.YAxis : 0,
+            featureToMeasure.Vectors.ZAxis != 0 ? CMM1.Velocity.ZAxis : 0);
 
         PointModel endpoint = Library3D.GetPointAtDistanceFrom(StartPoint, CMM1.Settings["CLRSRF"]);
         distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
-            StartPoint.Coordinates["x-axis"], endpoint.Coordinates["x-axis"],
-            StartPoint.Coordinates["y-axis"], endpoint.Coordinates["y-axis"],
-            StartPoint.Coordinates["z-axis"], endpoint.Coordinates["z-axis"]);
+            StartPoint.Coordinates.XAxis, endpoint.Coordinates.XAxis,
+            StartPoint.Coordinates.YAxis, endpoint.Coordinates.YAxis,
+            StartPoint.Coordinates.ZAxis, endpoint.Coordinates.ZAxis);
 
         output += Physics.GetTimeToTravelDistance(distanceToTravel, diagonalVelocity, diagonalAcceleration);
 

@@ -24,12 +24,12 @@ public class CircleModel : FeatureModel
     {
         Diameter = diameter;
         NumberOfDivisions = numberOfDivisions;
-        this.Coordinates["x-axis"] = point.Coordinates["x-axis"];
-        this.Coordinates["y-axis"] = point.Coordinates["y-axis"];
-        this.Coordinates["z-axis"] = point.Coordinates["z-axis"];
-        this.Vectors["x-axis"] = point.Vectors["x-axis"];
-        this.Vectors["y-axis"] = point.Vectors["y-axis"];
-        this.Vectors["z-axis"] = point.Vectors["z-axis"];
+        this.Coordinates.XAxis = point.Coordinates.XAxis;
+        this.Coordinates.YAxis= point.Coordinates.YAxis;
+        this.Coordinates.ZAxis = point.Coordinates.ZAxis;
+        this.Vectors.XAxis = point.Vectors.XAxis;
+        this.Vectors.YAxis = point.Vectors.YAxis;
+        this.Vectors.ZAxis = point.Vectors.ZAxis;
 
     }
 
@@ -53,28 +53,51 @@ public class CircleModel : FeatureModel
     public double GetCircleMeasurementTime(CircleModel circle, CMMModel CMM)
     {
         double output = 0;
+        double circleCoordinateOnDirectionAxis;
+        double distanceToTravel = 0;
+        double diagonalAcceleration = 0;
+        (double x, double y) pointOnCircle2D;
 
-        string[] circleAxis = circle.Vectors.Where(x => x.Value != 1).ToDictionary(x => x.Key, x => x.Value).Keys.ToArray();
-        var orderedVectors = circle.Vectors.OrderBy(x => Math.Abs(x.Value)).ToList();
-        string circleDirection = orderedVectors[2].Key;
-        //circleDirection = circle.Vectors.Where(x => x.Value == 1).ToList().First().Key;
+        if (circle.Vectors.XAxis == 1)
+        {
+            circleCoordinateOnDirectionAxis = circle.Coordinates.XAxis;
 
-        //circle.Coordinates[circleDirection] = 0;
-        PointModel pointOnCircle = GetOnePointOnCircle(circle.Coordinates[circleAxis[0]],
-            circle.Coordinates[circleAxis[1]],
-            circle.Coordinates[circleDirection],
-            circle.NumberOfDivisions,
-            circle.Diameter / 2,
-            circleAxis[0],
-            circleAxis[1],
-            circleDirection);
-        double distanceToTravel;
-        double diagonalAcceleration = Physics.GetDiagonalAcceleration(CMM.Acceleration[circleAxis[0]], CMM.Acceleration[circleAxis[1]],0);
-        double diagonalVelocity = Physics.GetDiagonalVelocity(CMM.Velocity[circleAxis[0]], CMM.Velocity[circleAxis[1]],0);
-        distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
-            circle.Coordinates["x-axis"], pointOnCircle.Coordinates["x-axis"],
-            circle.Coordinates["y-axis"], pointOnCircle.Coordinates["y-axis"],
-            circle.Coordinates["z-axis"], pointOnCircle.Coordinates["z-axis"]);
+            pointOnCircle2D = GetOnePointOnCircle2D(circle.Coordinates.YAxis,circle.Coordinates.ZAxis,circle.NumberOfDivisions,circle.Diameter / 2);
+
+            diagonalAcceleration = Physics.GetDiagonalAcceleration(CMM.Acceleration.YAxis, CMM.Acceleration.ZAxis, 0);
+            distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
+                circle.Coordinates.XAxis, circleCoordinateOnDirectionAxis,
+                circle.Coordinates.YAxis, pointOnCircle2D.x,
+                circle.Coordinates.ZAxis, pointOnCircle2D.y);
+        }
+        else if(circle.Vectors.YAxis == 1)
+        {
+            circleCoordinateOnDirectionAxis = circle.Coordinates.YAxis;
+
+            pointOnCircle2D = GetOnePointOnCircle2D(circle.Coordinates.XAxis,circle.Coordinates.ZAxis,circle.NumberOfDivisions,circle.Diameter / 2);
+
+            diagonalAcceleration = Physics.GetDiagonalAcceleration(CMM.Acceleration.XAxis, CMM.Acceleration.ZAxis, 0);
+            distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
+                circle.Coordinates.XAxis, pointOnCircle2D.x,
+                circle.Coordinates.YAxis, circleCoordinateOnDirectionAxis,
+                circle.Coordinates.ZAxis, pointOnCircle2D.y);
+        }
+        else if (circle.Vectors.ZAxis == 1)
+        {
+            circleCoordinateOnDirectionAxis = circle.Coordinates.ZAxis;
+
+            pointOnCircle2D = GetOnePointOnCircle2D(circle.Coordinates.XAxis,circle.Coordinates.YAxis,circle.NumberOfDivisions,circle.Diameter / 2);
+
+            diagonalAcceleration = Physics.GetDiagonalAcceleration(CMM.Acceleration.XAxis, CMM.Acceleration.YAxis, 0);
+            distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
+                circle.Coordinates.XAxis, pointOnCircle2D.x,
+                circle.Coordinates.YAxis, pointOnCircle2D.y,
+                circle.Coordinates.ZAxis, circleCoordinateOnDirectionAxis);
+        }
+        else //circle is on an inclined plane
+        {
+            throw new Exception($"Circle on inclined plane not implemented");
+        }
 
         output += circle.NumberOfDivisions * Physics.GetTimeToTravelDistance(distanceToTravel, CMM.TouchSpeed, diagonalAcceleration);
         output += circle.NumberOfDivisions * Physics.GetTimeToTravelDistance(distanceToTravel, CMM.RetractSpeed, CMM.RetractAcceleration);
@@ -82,16 +105,12 @@ public class CircleModel : FeatureModel
         return output;
     }
 
-    public PointModel GetOnePointOnCircle(double firstCoordinate, double secondCoordinate, double thirdCoordinate,int numberOfDivisions, double radius, string firstAxis, string secondAxis, string circleDirection)
+    public (double x,double y) GetOnePointOnCircle2D(double firstCoordinate, double secondCoordinate, int numberOfDivisions, double radius)
     {
-        PointModel pointOnCircle = new PointModel(0, 0, 0, 0, 0, 0);
         double angle = 360 / numberOfDivisions;
-        double x = firstCoordinate + radius * Math.Cos((Math.PI / 180) * angle);
-        double y = secondCoordinate + radius * Math.Sin((Math.PI / 180) * angle);
-        pointOnCircle.Coordinates[firstAxis] = x;
-        pointOnCircle.Coordinates[secondAxis] = y;
-        pointOnCircle.Coordinates[circleDirection] = thirdCoordinate;
+        double xCoord = firstCoordinate + radius * Math.Cos((Math.PI / 180) * angle);
+        double yCoord = secondCoordinate + radius * Math.Sin((Math.PI / 180) * angle);
 
-        return pointOnCircle;
+        return (xCoord,yCoord);
     }
 }
