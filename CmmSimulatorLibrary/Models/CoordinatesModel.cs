@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CMM_Simulator.Models;
-public class VectorsModel
+namespace CmmSimulatorLibrary.Models;
+public class CoordinatesModel
 {
     public double XAxis { get; set; }
     public double YAxis { get; set; }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CMM_Simulator.Enums;
+namespace CmmSimulatorLibrary.Enums;
 public enum Features
 {
     CIRCLE,

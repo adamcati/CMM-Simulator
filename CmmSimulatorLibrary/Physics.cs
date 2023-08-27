@@ -1,11 +1,11 @@
-﻿using CMM_Simulator.Models;
+﻿using CmmSimulatorLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CMM_Simulator;
+namespace CmmSimulatorLibrary;
 public class Physics
 {
     //distance in meters
@@ -73,21 +73,5 @@ public class Physics
     internal static double GetDiagonalAcceleration(double a1, double a2, double a3)
     {
         return Math.Sqrt(a1 * a1 + a2 * a2 + a3 * a3);
-    }
-
-    internal static double GetDiagonalMovementTimeToReachMaxVelocity(double[] velocities, double[] accelerations)
-    {
-        double output = 0;
-
-        for(int i = 0; i < velocities.Length; i++)
-        {
-            double timeToReachMaxVelocity = GetTimeToReachMaxVelocity(velocities[i], accelerations[i]);
-            if(timeToReachMaxVelocity > output)
-            {
-                output = timeToReachMaxVelocity;
-            }
-        }
-
-        return output;
     }
 }

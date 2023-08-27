@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CmmSimulatorLibrary.Enums;
 
-namespace CMM_Simulator.Models;
+namespace CmmSimulatorLibrary.Models;
 public class CMMModel
 {
     public Dictionary<string, double> Settings = new Dictionary<string, double>();
@@ -14,7 +15,6 @@ public class CMMModel
     public double RetractSpeed { get; set; }
     public double RetractAcceleration { get; set; }
     public double SearchSpeed { get; set; } // only for relative to surface auto mode
-    public string MeasurementUnits { get; set; }
 
     public CMMModel()
     {
@@ -47,11 +47,9 @@ public class CMMModel
         Settings.Add("DEPTH", 2); //depth
     }
 
-    public CMMModel(string measurementUnits)
+    public CMMModel(Units measurementUnits)
     {
-        MeasurementUnits = measurementUnits;
-
-        if (MeasurementUnits == "INCH")
+        if (measurementUnits == Units.Inch)
         {
             //Acceleration in inch/sec^2
             Acceleration = new CoordinatesModel()

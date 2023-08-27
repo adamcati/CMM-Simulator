@@ -1,5 +1,4 @@
-﻿using CsvHelper;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Formats.Asn1;
 using System.Globalization;
@@ -7,20 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CMM_Simulator;
+namespace CmmSimulatorLibrary;
 public static class FileHandler
 {
-    public static List<MovementModel> GetDataFromCSV()
-    {
-        using (var reader = new StreamReader("C:\\Users\\Adam\\Documents\\CMM-Simulator\\CMM-Simulator\\MovementsData.csv"))
-        using (var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture))
-        {
-            var records = csvReader.GetRecords<MovementModel>().ToList();
-
-            return records;
-        }
-    }
-
     public static List<string> ReadAllNonEmptyLines(string path)
     {
         string line;

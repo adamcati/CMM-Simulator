@@ -1,5 +1,4 @@
-﻿using CMM_Simulator.Controllers;
-using CMM_Simulator.Enums;
+﻿using CmmSimulatorLibrary.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CMM_Simulator.Models;
+namespace CmmSimulatorLibrary.Models;
 public class SlotModel : FeatureModel
 {
     public double Length { get; }

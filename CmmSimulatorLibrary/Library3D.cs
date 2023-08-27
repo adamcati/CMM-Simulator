@@ -1,4 +1,4 @@
-﻿using CMM_Simulator.Models;
+﻿using CmmSimulatorLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CMM_Simulator;
+namespace CmmSimulatorLibrary;
 
 public class Library3D
 {

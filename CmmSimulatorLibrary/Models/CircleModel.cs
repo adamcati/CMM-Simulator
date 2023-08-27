@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CMM_Simulator.Models;
+namespace CmmSimulatorLibrary.Models;
 public class CircleModel : FeatureModel
 {
     public double Diameter { get; set; }
-    public double Length { get; set; }
     public int NumberOfDivisions { get; set; }
 
     public CircleModel() { }

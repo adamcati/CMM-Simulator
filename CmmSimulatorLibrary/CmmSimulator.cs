@@ -1,18 +1,143 @@
-﻿using CMM_Simulator.Enums;
-using CMM_Simulator.Models;
+﻿using CmmSimulatorLibrary;
+using CmmSimulatorLibrary.Enums;
+using CmmSimulatorLibrary.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CMM_Simulator.Controllers;
-public class CMMController
+namespace CmmSimulatorLibrary;
+public class CmmSimulator
 {
     PointModel StartPoint = new PointModel(0, 0, 0, 0, 0, 0);
 
-    public double GetTimeOfBlockfExecution(Operations actionType, List<string> measurementBlock,CMMModel CMM1)
+    public double GetSimulationTime(string path)
+    {
+        //in seconds
+        double output = 0;
+        string errorLogFileName = Path.GetTempPath() + Guid.NewGuid().ToString() + ".log";
+        List<string> errorLog = new List<string>();
+        List<string> fileLines = FileHandler.ReadAllNonEmptyLines(path);
+
+        NormalizeFileLines(fileLines);
+
+        Units unitsOfMeasurement = GetUnitsOfMeasurement(fileLines);
+        CMMModel CMM1 = new CMMModel(unitsOfMeasurement);
+
+        GetMeasurementSettings(fileLines, CMM1);
+
+        List<string> measurementBlock = new List<string>();
+
+        int i = 0;
+        while (i < fileLines.Count)
+        {
+            try
+            {
+                if (fileLines[i].Contains("FEAT"))
+                {
+                    while (fileLines[i] != "ENDMES")
+                    {
+                        measurementBlock.Add(fileLines[i]);
+                        i++;
+                    }
+                    output += GetTimeOfBlockfExecution(Operations.Measurement, measurementBlock, CMM1);
+                    ClearMeasurementBock(measurementBlock);
+                }
+                else if (fileLines[i].Contains("GOTO"))
+                {
+                    measurementBlock.Add((string)fileLines[i]);
+                    output += GetTimeOfBlockfExecution(Operations.GoTo, measurementBlock, CMM1);
+                    ClearMeasurementBock(measurementBlock);
+                }
+                else if (fileLines[i].Contains("SNSLCT"))
+                {
+                    output += GetTimeOfBlockfExecution(Operations.SensorSelect, null, CMM1);
+                }
+                else if (fileLines[i].Contains("SNSET"))
+                {
+                    if (CMM1.Settings.ContainsKey(fileLines[i].Split('/')[1].Split(',')[0]))
+                    {
+                        CMM1.Settings[(fileLines[i].Split('/')[1].Split(',')[0])] = double.Parse(fileLines[i].Split('/')[1].Split(',')[1]);
+                    }
+                }
+                else
+                {
+                    errorLog.Add($"Other operations type: {fileLines[i]}");
+                }
+
+                i++;
+            }
+            catch (Exception e)
+            {
+               errorLog.Add(e.Message);
+            }
+        }
+
+        if(errorLog.Count > 0)
+        {
+            File.WriteAllLines(errorLogFileName, errorLog.ToArray());
+        }
+
+        return output;
+    }
+
+    void ClearMeasurementBock(List<string> measurementBlock)
+    {
+        measurementBlock.Clear();
+    }
+
+    void NormalizeFileLines(List<string> fileLines)
+    {
+        fileLines.RemoveTextOutfilFromFileLines();
+        fileLines.RemoveMultipleLineCode();
+        fileLines.RemoveCommentsFromFileLines();
+        fileLines.RemoveConstructedFeaturesFromFileLines();
+        fileLines.RemoveOutputsFromFileLines();
+        fileLines.RemoveTolerancesFromFileLines();
+    }
+
+    Units GetUnitsOfMeasurement(List<string> fileLines)
+    {
+        int counter = 0;
+        //default to MM
+        Units unitsOfMeasurement = Units.MM;
+
+        do
+        {
+            counter++;
+        } while ((counter < fileLines.Count) && (fileLines[counter].Contains("UNITS") == false));
+
+        if (fileLines[counter].Contains("UNITS"))
+        {
+            string[] data = fileLines[counter].Split('/');
+            string[] measurementData = data[1].Split(',');
+            if (measurementData[0] == "INCH")
+            {
+                unitsOfMeasurement = Units.Inch;
+            }
+        }
+
+        return unitsOfMeasurement;
+    }
+
+    void GetMeasurementSettings(List<string> fileLines, CMMModel CMM)
+    {
+        foreach (string line in fileLines)
+        {
+            if (line.Contains("SNSET"))
+            {
+                if (CMM.Settings.ContainsKey(line.Split('/')[1].Split(',')[0]))
+                {
+                    CMM.Settings[(line.Split('/')[1].Split(',')[0])] = double.Parse(line.Split('/')[1].Split(',')[1]);
+                }
+            }
+        }
+    }
+
+    double GetTimeOfBlockfExecution(Operations actionType, List<string> measurementBlock, CMMModel CMM1)
     {
         double output = 0;
 
@@ -39,11 +164,11 @@ public class CMMController
         return output;
     }
 
-    public double GetFeatureMeasurementTime(Features featureType, FeatureModel feature,CMMModel CMM)
+    double GetFeatureMeasurementTime(Features featureType, FeatureModel feature, CMMModel CMM)
     {
         double output = 0;
 
-        switch(featureType)
+        switch (featureType)
         {
             case Features.CIRCLE:
                 CircleModel circle = (CircleModel)feature;
@@ -80,12 +205,12 @@ public class CMMController
     {
         double output = 0;
 
-        if(measurementMode == ProgramModes.AUTO)
+        if (measurementMode == ProgramModes.AUTO)
         {
-            switch(featureType)
+            switch (featureType)
             {
                 case Features.CIRCLE:
-                    CircleModel circle = new CircleModel(0,0,0,0,0,0,0,0);
+                    CircleModel circle = new CircleModel(0, 0, 0, 0, 0, 0, 0, 0);
                     circle = circle.GetCircleFromMeasurementBlock(measurementBlock);
                     output += GetFeatureMeasurementTime(Features.CIRCLE, circle, CMM1);
                     SetStartPoint(circle);
@@ -100,7 +225,7 @@ public class CMMController
                 case Features.CYLNDR:
                     CylinderModel cylinder = new CylinderModel(0, 0, 0, 0, 0, 0, 0, 0, 0);
                     cylinder = cylinder.GetCylinderFromMeasurementBlock(measurementBlock);
-                    output += GetFeatureMeasurementTime(Features.CYLNDR, cylinder,CMM1);
+                    output += GetFeatureMeasurementTime(Features.CYLNDR, cylinder, CMM1);
                     break;
                 case Features.POINT:
                     double[] data = FeatureModel.GetFeatureData(measurementBlock.First());
@@ -124,11 +249,11 @@ public class CMMController
                     break;
             };
         }
-        else if(measurementMode == ProgramModes.PROGRAM)
+        else if (measurementMode == ProgramModes.PROGRAM)
         {
-           foreach(string block in measurementBlock)
+            foreach (string block in measurementBlock)
             {
-                if(block.Contains("PTMEAS"))
+                if (block.Contains("PTMEAS"))
                 {
                     double[] data = FeatureModel.GetFeatureData(block);
                     PointModel pointToMeasure = new PointModel(data[0], data[1], data[2], data[3], data[4], data[5]);
@@ -195,7 +320,7 @@ public class CMMController
     {
         double output = 0;
 
-        if(goToType == GoTo.CART)
+        if (goToType == GoTo.CART)
         {
             PointModel goTo = new PointModel(goToData[0], goToData[1], goToData[2], 0, 0, 0);
             double distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
@@ -208,7 +333,7 @@ public class CMMController
             output += Physics.GetTimeToTravelDistance(distanceToTravel, diagonalVelocity, diagonalAcceleration);
             SetStartPoint(goTo);
         }
-        else if(goToType == GoTo.INCR)
+        else if (goToType == GoTo.INCR)
         {
             double distanceToTravel = goToData[0];
             PointModel goToPoint =
@@ -235,7 +360,7 @@ public class CMMController
             PointModel endPoint = Library3D.GetPointAtDistanceFrom(goToPoint, distanceToTravel);
             output += GetDiagonalMoveToPointTime(StartPoint, endPoint, CMM1);
             SetStartPoint(endPoint);
-        }   
+        }
         else
         {
             throw new NotImplementedException($"GoTo type: {goToType} not recognized");

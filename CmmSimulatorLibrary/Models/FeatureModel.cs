@@ -1,11 +1,11 @@
-﻿using CMM_Simulator.Enums;
+﻿using CmmSimulatorLibrary.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CMM_Simulator.Models;
+namespace CmmSimulatorLibrary.Models;
 public class FeatureModel
 {
     public CoordinatesModel Coordinates { get; }
