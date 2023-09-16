@@ -58,10 +58,7 @@ public class CmmSimulator
                 }
                 else if (fileLines[i].Contains("SNSET"))
                 {
-                    if (CMM1.Settings.ContainsKey(fileLines[i].Split('/')[1].Split(',')[0]))
-                    {
-                        CMM1.Settings[(fileLines[i].Split('/')[1].Split(',')[0])] = double.Parse(fileLines[i].Split('/')[1].Split(',')[1]);
-                    }
+                    SetSettingsValue(fileLines[i], CMM1);
                 }
                 else
                 {
@@ -82,6 +79,31 @@ public class CmmSimulator
         }
 
         return output;
+    }
+
+    void SetSettingsValue(string fileLine, CMMModel CMM1)
+    {
+        string settingsType = fileLine.Split('/')[1].Split(',')[0];
+        Settings setting;
+        if (Enum.TryParse(settingsType, out setting))
+        {
+            double settingValue = double.Parse(fileLine.Split('/')[1].Split(',')[1]);
+            switch (setting)
+            {
+                case Settings.APPRCH:
+                    CMM1.Settings.Approach = settingValue;
+                    break;
+                case Settings.RETRCT:
+                    CMM1.Settings.Retract = settingValue;
+                    break;
+                case Settings.CLRSRF:
+                    CMM1.Settings.Clearance = settingValue;
+                    break;
+                case Settings.DEPTH:
+                    CMM1.Settings.Depth = settingValue;
+                    break;
+            }
+        }
     }
 
     void ClearMeasurementBock(List<string> measurementBlock)
@@ -129,10 +151,7 @@ public class CmmSimulator
         {
             if (line.Contains("SNSET"))
             {
-                if (CMM.Settings.ContainsKey(line.Split('/')[1].Split(',')[0]))
-                {
-                    CMM.Settings[(line.Split('/')[1].Split(',')[0])] = double.Parse(line.Split('/')[1].Split(',')[1]);
-                }
+                SetSettingsValue(line,CMM);
             }
         }
     }
@@ -189,10 +208,10 @@ public class CmmSimulator
                 output += GetClearanceMoveTime(pointToMeasure, CMM);
                 output += GetMoveToFeatureTime(pointToMeasure, CMM);
                 SetStartPoint(pointToMeasure);
-                PointModel pointAtApproachDistance = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM.Settings["APPRCH"]);
+                PointModel pointAtApproachDistance = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM.Settings.Approach);
                 output += GetDiagonalMoveToPointTime(StartPoint, pointAtApproachDistance, CMM);
                 output += GetSinglePointMeasurementTime(pointAtApproachDistance, pointToMeasure, CMM);
-                PointModel pointAtRetractDistance = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM.Settings["RETRCT"]);
+                PointModel pointAtRetractDistance = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM.Settings.Retract);
                 output += GetRetractFromPointTime(pointToMeasure, pointAtRetractDistance, CMM);
                 SetStartPoint(pointAtRetractDistance);
                 break;
@@ -257,10 +276,10 @@ public class CmmSimulator
                 {
                     double[] data = FeatureModel.GetFeatureData(block);
                     PointModel pointToMeasure = new PointModel(data[0], data[1], data[2], data[3], data[4], data[5]);
-                    PointModel endPoint = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings["APPRCH"]);
+                    PointModel endPoint = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings.Approach);
                     output += GetDiagonalMoveToPointTime(StartPoint, endPoint, CMM1);
                     output += GetSinglePointMeasurementTime(endPoint, pointToMeasure, CMM1);
-                    endPoint = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings["RETRCT"]);
+                    endPoint = Library3D.GetPointAtDistanceFrom(pointToMeasure, CMM1.Settings.Retract);
                     output += GetRetractFromPointTime(pointToMeasure, endPoint, CMM1);
                     SetStartPoint(pointToMeasure);
                 }
@@ -436,7 +455,7 @@ public class CmmSimulator
             featureToMeasure.Vectors.YAxis != 0 ? CMM1.Velocity.YAxis : 0,
             featureToMeasure.Vectors.ZAxis != 0 ? CMM1.Velocity.ZAxis : 0);
 
-        PointModel endpoint = Library3D.GetPointAtDistanceFrom(StartPoint, CMM1.Settings["CLRSRF"]);
+        PointModel endpoint = Library3D.GetPointAtDistanceFrom(StartPoint, CMM1.Settings.Clearance);
         distanceToTravel = Library3D.GetDistanceBetweenTwoPoints(
             StartPoint.Coordinates.XAxis, endpoint.Coordinates.XAxis,
             StartPoint.Coordinates.YAxis, endpoint.Coordinates.YAxis,

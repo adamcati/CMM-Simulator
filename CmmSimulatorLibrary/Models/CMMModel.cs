@@ -8,7 +8,7 @@ using CmmSimulatorLibrary.Enums;
 namespace CmmSimulatorLibrary.Models;
 public class CMMModel
 {
-    public Dictionary<string, double> Settings = new Dictionary<string, double>();
+    public CmmSettingsModel Settings { get; }
     public CoordinatesModel Acceleration { get; }
     public CoordinatesModel Velocity { get; }
     public double TouchSpeed { get; set; }
@@ -41,10 +41,11 @@ public class CMMModel
         SearchSpeed = 8.3333;
 
         //in mm 
-        Settings.Add("APPRCH", 5); //approach distance
-        Settings.Add("RETRCT", 5); //retract distance
-        Settings.Add("CLRSRF", 15); //clearance distabce
-        Settings.Add("DEPTH", 2); //depth
+        Settings = new CmmSettingsModel();
+        Settings.Approach = 5; //approach distance
+        Settings.Retract = 1; //retract distance
+        Settings.Clearance = 15; //clearance distabce
+        Settings.Depth = 2; //depth
     }
 
     public CMMModel(Units measurementUnits)
@@ -74,10 +75,11 @@ public class CMMModel
             SearchSpeed = 0.3281;
 
             //in inch 
-            Settings.Add("APPRCH", 0.08); //approach distance
-            Settings.Add("RETRCT", 0.04); //retract distance
-            Settings.Add("CLRSRF", 0.2); //clearance distabce
-            Settings.Add("DEPTH", 0.04); //depth
+            Settings = new CmmSettingsModel();
+            Settings.Approach = 0.08; //approach distance
+            Settings.Retract = 0.04; //retract distance
+            Settings.Clearance = 0.2; //clearance distabce
+            Settings.Depth = 0.08; //depth
         }
         else
         {
@@ -104,10 +106,11 @@ public class CMMModel
             SearchSpeed = 8.3333;
 
             //in mm 
-            Settings.Add("APPRCH", 5); //approach distance
-            Settings.Add("RETRCT", 5); //retract distance
-            Settings.Add("CLRSRF", 15); //clearance distabce
-            Settings.Add("DEPTH", 2); //depth
+            Settings = new CmmSettingsModel();
+            Settings.Approach = 5; //approach distance
+            Settings.Retract = 1; //retract distance
+            Settings.Clearance = 15; //clearance distabce
+            Settings.Depth = 2; //depth
         }
     }
 }
