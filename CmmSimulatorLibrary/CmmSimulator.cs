@@ -14,13 +14,12 @@ public class CmmSimulator
 {
     PointModel StartPoint = new PointModel(0, 0, 0, 0, 0, 0);
 
-    public double GetSimulationTime(string path)
+    public double GetSimulationTime(List<string> fileLines)
     {
         //in seconds
         double output = 0;
         string errorLogFileName = Path.GetTempPath() + Guid.NewGuid().ToString() + ".log";
         List<string> errorLog = new List<string>();
-        List<string> fileLines = FileHandler.ReadAllNonEmptyLines(path);
 
         NormalizeFileLines(fileLines);
 

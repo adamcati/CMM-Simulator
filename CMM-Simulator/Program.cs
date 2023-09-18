@@ -4,7 +4,8 @@ using CmmSimulatorLibrary.Models;
 
 CmmSimulator CmmSimulator = new CmmSimulator();
 
-double simulationTime = CmmSimulator.GetSimulationTime("C:\\Users\\Adam\\Downloads\\V5327470720000_REV_A00.dmi");
+List<string> fileLines = FileHandler.ReadAllNonEmptyLines("C:\\Users\\Adam\\Downloads\\V5327470720000_REV_A00.dmi");
+double simulationTime = CmmSimulator.GetSimulationTime(fileLines);
 
 Console.WriteLine();
 Console.WriteLine($"Total Measurement time: {simulationTime} seconds");
