@@ -4,7 +4,7 @@ using CmmSimulatorLibrary.Models;
 
 CmmSimulator CmmSimulator = new CmmSimulator();
 
-List<string> fileLines = FileHandler.ReadAllNonEmptyLines("C:\\Users\\Adam\\Downloads\\V5327470720000_REV_A00.dmi");
+List<string> fileLines = FileHandler.ReadAllNonEmptyLines("C:\\Users\\Adam\\Downloads\\19197_REV_A1A_Rev6.dmi");
 double simulationTime = CmmSimulator.GetSimulationTime(fileLines);
 
 Console.WriteLine();

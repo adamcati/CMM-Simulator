@@ -34,8 +34,8 @@ public class CmmSimulator
         while (i < fileLines.Count)
         {
             try
-            {
-                if (fileLines[i].Contains("FEAT"))
+             {
+                if (fileLines[i].Contains("=FEAT/"))
                 {
                     while (fileLines[i] != "ENDMES")
                     {
@@ -45,17 +45,18 @@ public class CmmSimulator
                     output += GetTimeOfBlockfExecution(Operations.Measurement, measurementBlock, CMM1);
                     ClearMeasurementBock(measurementBlock);
                 }
-                else if (fileLines[i].Contains("GOTO"))
+                else if (fileLines[i].Contains("GOTO/"))
                 {
                     measurementBlock.Add((string)fileLines[i]);
                     output += GetTimeOfBlockfExecution(Operations.GoTo, measurementBlock, CMM1);
                     ClearMeasurementBock(measurementBlock);
                 }
-                else if (fileLines[i].Contains("SNSLCT"))
+                else if (fileLines[i].Contains("SNSLCT/"))
                 {
                     output += GetTimeOfBlockfExecution(Operations.SensorSelect, null, CMM1);
+
                 }
-                else if (fileLines[i].Contains("SNSET"))
+                else if (fileLines[i].Contains("SNSET/"))
                 {
                     SetSettingsValue(fileLines[i], CMM1);
                 }
@@ -69,6 +70,7 @@ public class CmmSimulator
             catch (Exception e)
             {
                errorLog.Add(e.Message);
+                i++;
             }
         }
 
